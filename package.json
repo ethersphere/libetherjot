@@ -1,0 +1,31 @@
+{
+    "name": "libetherjot",
+    "version": "0.1.0",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "cafe-node-utility": "^1.1.0",
+        "cafe-utility": "^10.22.0",
+        "ethers": "^6.7.1",
+        "js-yaml": "^4.1.0",
+        "mantaray-js": "^1.0.3",
+        "toml": "^3.0.0"
+    },
+    "devDependencies": {
+        "@types/js-yaml": "^4.0.5",
+        "@types/marked": "^4.0.8",
+        "rimraf": "^4.4.1",
+        "typescript": "^5.0.2"
+    },
+    "peerDependencies": {
+        "@ethersphere/bee-js": "^6.4.0",
+        "marked": "^4.2.12"
+    }
+}
