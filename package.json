@@ -1,6 +1,6 @@
 {
     "name": "libetherjot",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -16,7 +16,6 @@
         "ethers": "^6.7.1",
         "js-yaml": "^4.1.0",
         "libswarm": "^0.1.0",
-        "mantaray-js": "^1.0.3",
         "toml": "^3.0.0"
     },
     "devDependencies": {

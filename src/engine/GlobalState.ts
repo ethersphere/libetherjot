@@ -1,7 +1,6 @@
 import { Objects, Types } from 'cafe-utility'
 import { Wallet, ethers } from 'ethers'
 import { Swarm } from 'libswarm'
-import { MantarayNode } from 'mantaray-js'
 import { createFrontPage } from '../page/FrontPage'
 
 interface Asset {
@@ -73,7 +72,6 @@ export interface GlobalState {
     articles: Article[]
     images: Record<string, string>
     collections: Record<string, string>
-    mantaray: MantarayNode
     assets: Asset[]
 }
 
@@ -202,7 +200,6 @@ async function createGlobalState(globalStateOnDisk: GlobalStateOnDisk): Promise<
         articles: globalStateOnDisk.articles,
         images: globalStateOnDisk.images,
         collections: globalStateOnDisk.collections,
-        mantaray: new MantarayNode(),
         assets: globalStateOnDisk.assets
     }
     return globalState
