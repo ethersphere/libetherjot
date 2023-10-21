@@ -1,6 +1,6 @@
 {
     "name": "libetherjot",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -26,6 +26,6 @@
         "typescript": "^5.0.2"
     },
     "peerDependencies": {
-        "marked": "^4.2.12"
+        "marked": "^9.0.3"
     }
 }
