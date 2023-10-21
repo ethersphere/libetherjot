@@ -9,7 +9,7 @@ export function createDonationButton(globalState: GlobalState) {
             ethereum.request({ method: 'eth_requestAccounts' }).then(accounts => {
                 const account = accounts[0];
                 const params = {
-                    to: '${globalState.stamp}',
+                    to: '${'0000'}',
                     from: account,
                     value: 0x38d7ea4c68000
                 }

@@ -1,4 +1,3 @@
-import { Bee } from '@ethersphere/bee-js'
 import { Strings } from 'cafe-utility'
 import { ParsedMarkdown } from '../engine/FrontMatter'
 import { Article, GlobalState } from '../engine/GlobalState'
@@ -16,7 +15,6 @@ import { createTagCloud } from '../html/TagCloud'
 import { createTwitterSvg } from '../html/TwitterSvg'
 
 export async function createArticlePage(
-    bee: Bee,
     title: string,
     markdown: ParsedMarkdown,
     globalState: GlobalState,
@@ -105,11 +103,8 @@ export async function createArticlePage(
         })
     </script>`
     const html = await createHtml5(head, body)
-    const markdownResults = await bee.uploadFile(globalState.stamp, markdown.raw, 'index.md', {
-        contentType: 'text/markdown',
-        deferred: true
-    })
-    const htmlResults = await bee.uploadData(globalState.stamp, html, { deferred: true })
+    const markdownHandle = await globalState.swarm.newResource('index.md', markdown.raw, 'text/markdown').save()
+    const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
     const path = `post/${createArticleSlug(title)}`
     return {
         title,
@@ -118,8 +113,8 @@ export async function createArticlePage(
         kind: 'regular',
         categories: [],
         tags: tagsAndCategories,
-        markdown: markdownResults.reference,
-        html: htmlResults.reference,
+        markdown: markdownHandle.hash,
+        html: htmlHash,
         path,
         createdAt: Date.now()
     }

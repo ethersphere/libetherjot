@@ -1,23 +1,13 @@
-import { Bee, BeeDebug } from '@ethersphere/bee-js'
-import { Arrays, Objects, Types } from 'cafe-utility'
+import { Objects, Types } from 'cafe-utility'
 import { Wallet, ethers } from 'ethers'
+import { Swarm } from 'libswarm'
 import { MantarayNode } from 'mantaray-js'
-import { createDefaultImage } from '../html/DefaultImage'
-import { createFavicon } from '../html/Favicon'
-import { createArticleFontData, createBrandingFontData, createNormalFontData } from '../html/Font'
-import { createStyle } from '../html/Style'
 import { createFrontPage } from '../page/FrontPage'
 
 interface Asset {
     name: string
     contentType: string
     reference: string
-}
-
-interface FontCollection {
-    menu: string
-    branding: string
-    article: string
 }
 
 interface Configuration {
@@ -67,10 +57,6 @@ export interface GlobalStateOnDisk {
     privateKey: string
     configuration: Configuration
     feed: string
-    styleReference: string
-    font: FontCollection
-    defaultCoverImage: string
-    favicon: string
     pages: Page[]
     articles: Article[]
     images: Record<string, string>
@@ -79,14 +65,10 @@ export interface GlobalStateOnDisk {
 }
 
 export interface GlobalState {
+    swarm: Swarm
     wallet: Wallet
-    stamp: string
     configuration: Configuration
     feed: string
-    styleReference: string
-    font: FontCollection
-    defaultCoverImage: string
-    favicon: string
     pages: Page[]
     articles: Article[]
     images: Record<string, string>
@@ -95,7 +77,7 @@ export interface GlobalState {
     assets: Asset[]
 }
 
-export async function getGlobalState(beeDebug: BeeDebug, json: Record<string, any>): Promise<GlobalState> {
+export async function getGlobalState(json: Record<string, any>): Promise<GlobalState> {
     const configuration = Types.asObject(json.configuration)
     const globalStateOnDisk: GlobalStateOnDisk = {
         privateKey: Types.asString(json.privateKey),
@@ -122,14 +104,6 @@ export async function getGlobalState(beeDebug: BeeDebug, json: Record<string, an
             allowDonations: Types.asBoolean(Objects.getDeep(configuration, 'allowDonations'))
         },
         feed: Types.asString(json.feed),
-        styleReference: Types.asString(json.styleReference),
-        font: {
-            menu: Types.asString(Types.asObject(json.font).menu),
-            branding: Types.asString(Types.asObject(json.font).branding),
-            article: Types.asString(Types.asObject(json.font).article)
-        },
-        defaultCoverImage: Types.asString(json.defaultCoverImage),
-        favicon: Types.asString(json.favicon),
         pages: Types.asArray(json.pages).map((x: any) => ({
             title: Types.asString(x.title),
             markdown: Types.asString(x.markdown),
@@ -158,7 +132,7 @@ export async function getGlobalState(beeDebug: BeeDebug, json: Record<string, an
             reference: Types.asString(x.reference)
         }))
     }
-    return createGlobalState(beeDebug, globalStateOnDisk)
+    return createGlobalState(globalStateOnDisk)
 }
 
 export async function saveGlobalState(globalState: GlobalState): Promise<GlobalStateOnDisk> {
@@ -166,10 +140,6 @@ export async function saveGlobalState(globalState: GlobalState): Promise<GlobalS
         privateKey: globalState.wallet.privateKey,
         configuration: globalState.configuration,
         feed: globalState.feed,
-        styleReference: globalState.styleReference,
-        font: globalState.font,
-        defaultCoverImage: globalState.defaultCoverImage,
-        favicon: globalState.favicon,
         pages: globalState.pages,
         articles: globalState.articles,
         images: globalState.images,
@@ -179,34 +149,16 @@ export async function saveGlobalState(globalState: GlobalState): Promise<GlobalS
     return globalStateOnDisk
 }
 
-export async function createDefaultGlobalState(
-    bee: Bee,
-    beeDebug: BeeDebug,
-    websiteName: string
-): Promise<GlobalStateOnDisk> {
+export async function createDefaultGlobalState(websiteName: string): Promise<GlobalStateOnDisk> {
+    const swarm = new Swarm()
     const wallet = ethers.Wallet.createRandom()
-    const stamp = await getStamp(beeDebug)
-    const feedReference = await bee.createFeedManifest(stamp, 'sequence', '0'.repeat(64), wallet.address)
-    const fontNormalResults = await bee.uploadData(stamp, createNormalFontData(), { deferred: true })
-    const fontBrandingResults = await bee.uploadData(stamp, createBrandingFontData(), { deferred: true })
-    const fontArticleResults = await bee.uploadData(stamp, createArticleFontData(), { deferred: true })
-    const styleResults = await bee.uploadData(stamp, createStyle(), { deferred: true })
-    const defaultCoverImageResults = await bee.uploadData(stamp, createDefaultImage(), { deferred: true })
-    const faviconResults = await bee.uploadData(stamp, createFavicon(), { deferred: true })
+    const feed = await swarm.newWebsite(websiteName, swarm.newCollection()).generateAddress()
     const globalStateOnDisk: GlobalStateOnDisk = {
         privateKey: wallet.privateKey,
         pages: [],
         articles: [],
         images: {},
-        feed: feedReference.reference,
-        styleReference: styleResults.reference,
-        font: {
-            menu: fontNormalResults.reference,
-            branding: fontBrandingResults.reference,
-            article: fontArticleResults.reference
-        },
-        defaultCoverImage: defaultCoverImageResults.reference,
-        favicon: faviconResults.reference,
+        feed,
         configuration: {
             title: websiteName,
             header: {
@@ -232,13 +184,13 @@ export async function createDefaultGlobalState(
         collections: {},
         assets: []
     }
-    await createFrontPage(bee, await createGlobalState(beeDebug, globalStateOnDisk))
+    await createFrontPage(await createGlobalState(globalStateOnDisk))
     return globalStateOnDisk
 }
 
-async function createGlobalState(beeDebug: BeeDebug, globalStateOnDisk: GlobalStateOnDisk): Promise<GlobalState> {
-    const stamp = await getStamp(beeDebug)
+async function createGlobalState(globalStateOnDisk: GlobalStateOnDisk): Promise<GlobalState> {
     const globalState: GlobalState = {
+        swarm: new Swarm(),
         wallet: new ethers.Wallet(
             globalStateOnDisk.privateKey.startsWith('0x')
                 ? globalStateOnDisk.privateKey.slice(2)
@@ -246,11 +198,6 @@ async function createGlobalState(beeDebug: BeeDebug, globalStateOnDisk: GlobalSt
         ),
         configuration: globalStateOnDisk.configuration,
         feed: globalStateOnDisk.feed,
-        styleReference: globalStateOnDisk.styleReference,
-        font: globalStateOnDisk.font,
-        defaultCoverImage: globalStateOnDisk.defaultCoverImage,
-        favicon: globalStateOnDisk.favicon,
-        stamp,
         pages: globalStateOnDisk.pages,
         articles: globalStateOnDisk.articles,
         images: globalStateOnDisk.images,
@@ -259,12 +206,4 @@ async function createGlobalState(beeDebug: BeeDebug, globalStateOnDisk: GlobalSt
         assets: globalStateOnDisk.assets
     }
     return globalState
-}
-
-async function getStamp(beeDebug: BeeDebug): Promise<string> {
-    const stamps = await beeDebug.getAllPostageBatch()
-    if (stamps.length === 0) {
-        throw new Error('No stamps available. Please create a stamp using Bee Debug API.')
-    }
-    return Arrays.pick(stamps).batchID
 }

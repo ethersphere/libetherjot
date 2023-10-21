@@ -1,4 +1,3 @@
-import { Bee } from '@ethersphere/bee-js'
 import { GlobalState } from '../engine/GlobalState'
 import { createFooter } from '../html/Footer'
 import { createHeader } from '../html/Header'
@@ -7,8 +6,8 @@ import { createPostContainer } from '../html/PostContainer'
 import { createStyleSheet } from '../html/StyleSheet'
 import { createCollectionPage } from './CollectionPage'
 
-export async function createFrontPage(bee: Bee, globalState: GlobalState): Promise<{ swarmReference: string }> {
-    await buildCollectionPages(bee, globalState)
+export async function createFrontPage(globalState: GlobalState) {
+    await buildCollectionPages(globalState)
     const head = `<title>${globalState.configuration.title}</title>${createStyleSheet(0)}`
     const body = `
     ${await createHeader(globalState, 0, 'Latest')}
@@ -20,15 +19,10 @@ export async function createFrontPage(bee: Bee, globalState: GlobalState): Promi
     </main>
     ${await createFooter(globalState, 0)}`
     const html = await createHtml5(head, body)
-    const htmlResults = await bee.uploadData(globalState.stamp, html, {
-        deferred: true
-    })
-    return {
-        swarmReference: htmlResults.reference
-    }
+    return globalState.swarm.newRawData(html, 'text/html')
 }
 
-async function buildCollectionPages(bee: Bee, globalState: GlobalState) {
+async function buildCollectionPages(globalState: GlobalState) {
     const uniqueCategories = new Set<string>()
     const uniqueTags = new Set<string>()
     for (const article of globalState.articles) {
@@ -40,11 +34,9 @@ async function buildCollectionPages(bee: Bee, globalState: GlobalState) {
         }
     }
     for (const category of uniqueCategories) {
-        const { swarmReference } = await createCollectionPage(bee, category, globalState)
-        globalState.collections[category] = swarmReference
+        globalState.collections[category] = await createCollectionPage(globalState, category)
     }
     for (const tag of uniqueTags) {
-        const { swarmReference } = await createCollectionPage(bee, tag, globalState)
-        globalState.collections[tag] = swarmReference
+        globalState.collections[tag] = await createCollectionPage(globalState, tag)
     }
 }

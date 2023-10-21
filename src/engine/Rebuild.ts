@@ -1,32 +1,25 @@
-import { Bee } from '@ethersphere/bee-js'
 import { createArticlePage } from '../page/ArticlePage'
 import { createMenuPage } from '../page/MenuPage'
 import { parseMarkdown } from './FrontMatter'
 import { GlobalState } from './GlobalState'
 
-export async function rebuildMenuPages(
-    bee: Bee,
-    globalState: GlobalState,
-    parseFn: (markdown: string) => string
-): Promise<void> {
+export async function rebuildMenuPages(globalState: GlobalState, parseFn: (markdown: string) => string): Promise<void> {
     for (const page of globalState.pages) {
-        const rawData = await bee.downloadFile(page.markdown)
-        const results = await createMenuPage(bee, page.title, rawData.data.text(), globalState, parseFn)
+        const rawData = await globalState.swarm.downloadRawData(page.markdown, 'text/markdown')
+        const results = await createMenuPage(page.title, rawData.utf8, globalState, parseFn)
         page.html = results.swarmReference
     }
 }
 
 export async function rebuildArticlePages(
-    bee: Bee,
     globalState: GlobalState,
     parseFn: (markdown: string) => string
 ): Promise<void> {
     for (const article of globalState.articles) {
-        const rawData = await bee.downloadFile(article.markdown)
+        const rawData = await globalState.swarm.downloadRawData(article.markdown, 'text/markdown')
         const results = await createArticlePage(
-            bee,
             article.title,
-            parseMarkdown(rawData.data.text()),
+            parseMarkdown(rawData.utf8),
             globalState,
             [...article.tags, ...article.categories],
             article.banner,

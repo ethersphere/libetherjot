@@ -1,4 +1,3 @@
-import { Bee } from '@ethersphere/bee-js'
 import { GlobalState } from '../engine/GlobalState'
 import { preprocess } from '../engine/Preprocessor'
 import { createFooter } from '../html/Footer'
@@ -7,7 +6,6 @@ import { createHtml5 } from '../html/Html5'
 import { createStyleSheet } from '../html/StyleSheet'
 
 export async function createMenuPage(
-    bee: Bee,
     title: string,
     markdown: string,
     globalState: GlobalState,
@@ -21,13 +19,10 @@ export async function createMenuPage(
         parseFn(markdown)
     )}</main>${await createFooter(globalState, 0)}`
     const html = await createHtml5(head, body)
-    const markdownResults = await bee.uploadFile(globalState.stamp, markdown, 'index.md', {
-        contentType: 'text/markdown',
-        deferred: true
-    })
-    const htmlResults = await bee.uploadData(globalState.stamp, html)
+    const markdownHandle = await globalState.swarm.newResource('index.md', markdown, 'text/markdown').save()
+    const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
     return {
-        markdownReference: markdownResults.reference,
-        swarmReference: htmlResults.reference
+        markdownReference: markdownHandle.hash,
+        swarmReference: htmlHash
     }
 }
