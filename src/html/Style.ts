@@ -55,6 +55,9 @@ nav {
 header svg {
     height: 32px;
 }
+header img {
+    height: 32px;
+}
 footer svg {
     height: 32px;
 }
@@ -437,6 +440,10 @@ button {
 .search-result a {
     color: #111111;
     font-size: 14px;
+}
+.tag-cloud {
+    display: flex;
+    gap: 4px;
 }
 @media screen and (max-width: 992px) {
     .post-container {

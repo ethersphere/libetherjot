@@ -3,6 +3,7 @@ import { createTagCloud } from './TagCloud'
 export function createPost(
     title: string,
     preview: string,
+    category: string,
     tags: string[],
     createdAt: number,
     path: string,

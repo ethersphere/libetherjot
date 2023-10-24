@@ -18,7 +18,7 @@ export async function createMenuPage(
     const body = `${await createHeader(globalState, 0, 'Latest')}<main>${await preprocess(
         parseFn(markdown)
     )}</main>${await createFooter(globalState, 0)}`
-    const html = await createHtml5(head, body)
+    const html = await createHtml5(head, body, 0)
     const markdownHandle = await globalState.swarm.newResource('index.md', markdown, 'text/markdown').save()
     const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
     return {

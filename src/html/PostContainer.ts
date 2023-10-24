@@ -4,7 +4,7 @@ import { createPost } from './Post'
 
 export function createPostContainer(globalState: GlobalState, filter?: string): string {
     if (filter) {
-        const articles = globalState.articles.filter(x => x.categories.includes(filter))
+        const articles = globalState.articles.filter(x => x.category === filter || x.tags.includes(filter))
         return `
             <div class="post-container post-container-regular">
                 ${articles.map(x => buildArticle(x, 'regular')).join('\n')}
@@ -17,7 +17,7 @@ export function createPostContainer(globalState: GlobalState, filter?: string): 
             if (article.kind !== 'regular') {
                 continue
             }
-            if (!article.categories.includes(highlight)) {
+            if (article.category !== highlight) {
                 continue
             }
             article.kind = 'highlight'
@@ -70,13 +70,5 @@ function maybeSurround(globalState: GlobalState, string: string, kind: string): 
 }
 
 function buildArticle(x: Article, as: 'h1' | 'h2' | 'highlight' | 'regular'): string {
-    return createPost(
-        x.title,
-        x.preview,
-        [...x.tags, ...x.categories],
-        x.createdAt,
-        x.path,
-        x.banner || 'default.png',
-        as
-    )
+    return createPost(x.title, x.preview, x.category, x.tags, x.createdAt, x.path, x.banner || 'default.png', as)
 }

@@ -1,9 +1,9 @@
 import { Article, GlobalState } from '../engine/GlobalState'
 import { createPost } from './Post'
 
-export function createRelatedArticles(globalState: GlobalState, ignoreTitle: string, category: string): string | null {
+export function createRelatedArticles(globalState: GlobalState, ignoreTitle: string, tags: string[]): string | null {
     const articles = globalState.articles
-        .filter(x => x.categories.includes(category))
+        .filter(x => x.tags.some(tag => tags.includes(tag)))
         .filter(x => x.title !== ignoreTitle)
         .slice(0, 4)
     if (!articles.length) {
@@ -21,7 +21,8 @@ function buildArticle(x: Article, as: 'h1' | 'h2' | 'highlight' | 'regular'): st
     return createPost(
         x.title,
         x.preview,
-        [...x.tags, ...x.categories],
+        x.category,
+        x.tags,
         x.createdAt,
         x.path.replace('post/', ''),
         x.banner || 'default.png',

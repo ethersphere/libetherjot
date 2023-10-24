@@ -21,7 +21,8 @@ export async function rebuildArticlePages(
             article.title,
             parseMarkdown(rawData.utf8),
             globalState,
-            [...article.tags, ...article.categories],
+            article.category,
+            article.tags,
             article.banner,
             new Date(article.createdAt).toDateString(),
             parseFn

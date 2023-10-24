@@ -15,7 +15,7 @@ export async function createCollectionPage(globalState: GlobalState, collectionN
         </div>
     </main>
     ${await createFooter(globalState, 0)}`
-    const html = await createHtml5(head, body)
+    const html = await createHtml5(head, body, 0)
     const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
     return htmlHash
 }

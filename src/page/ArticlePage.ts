@@ -18,22 +18,26 @@ export async function createArticlePage(
     title: string,
     markdown: ParsedMarkdown,
     globalState: GlobalState,
-    tagsAndCategories: string[],
+    category: string,
+    tags: string[],
     banner: string,
     date: string,
     parseFn: (markdown: string) => string
 ): Promise<Article> {
     const processedArticle = await preprocess(parseFn(markdown.body))
-    const sidebarPublishedHtml = tagsAndCategories.length
-        ? `<div class="article-sidebar-block"><h3>Published in:</h3>${createTagCloud(tagsAndCategories, 1)}</div>`
+    const sidebarPublishedHtml = tags.length
+        ? `<div class="article-sidebar-block"><h3>Published in:</h3><div class="tag-cloud">${createTagCloud(
+              tags,
+              2
+          )}</div></div>`
         : ``
-    const relatedArticlesHtml = createRelatedArticles(globalState, title, tagsAndCategories[0] || '')
+    const relatedArticlesHtml = createRelatedArticles(globalState, title, tags)
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
-    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(1)}`
+    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}`
     const body = `
-    ${await createHeader(globalState, 1, 'Latest', 'p')}
+    ${await createHeader(globalState, 2, 'Latest', 'p')}
     <main>
         <article>
             <div class="content-area grid-container">
@@ -41,7 +45,7 @@ export async function createArticlePage(
                     <p class="article-date">${date}</p>
                 </div>
                 <div class="grid-6">
-                    ${createTagCloud(tagsAndCategories, 1)}
+                    ${createTagCloud([category], 2)}
                     <h1>${title}</h1>
                 </div>
             </div>
@@ -52,12 +56,16 @@ export async function createArticlePage(
                 <aside class="grid-3">
                     <div class="article-sidebar">
                         <div class="article-sidebar-block">
-                            <h3>Jump to:</h3>
+                        ${
+                            processedArticle.tableOfContents.length
+                                ? `<h3>Jump to:</h3>
                             <div class="table-of-contents">
                                 ${processedArticle.tableOfContents
                                     .map(x => `<a href="#${x}">${Strings.camelToTitle(Strings.slugToCamel(x))}</a>`)
                                     .join('')}
-                            </div>
+                            </div>`
+                                : ''
+                        }
                         </div>
                         ${sidebarPublishedHtml}
                         <div class="article-sidebar-block">
@@ -70,13 +78,17 @@ export async function createArticlePage(
                 </aside>
                 <div class="grid-6">
                     ${processedArticle.html}
+                    ${
+                        globalState.configuration.allowDonations
+                            ? await createDonationButton(globalState, await globalState.swarm.mustGetUsableStamp())
+                            : ''
+                    }
                 </div>
-                ${globalState.configuration.allowDonations ? createDonationButton(globalState) : ''}
             </div>
         </article>
         ${readMoreHtml}
     </main>
-    ${await createFooter(globalState, 1)}
+    ${await createFooter(globalState, 2)}
     <script>
         const shareLink = document.getElementById('share-link')
         const shareTwitter = document.getElementById('share-twitter')
@@ -102,20 +114,22 @@ export async function createArticlePage(
             window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url))
         })
     </script>`
-    const html = await createHtml5(head, body)
+    const year = new Date().getFullYear()
+    const html = await createHtml5(head, body, 2)
     const markdownHandle = await globalState.swarm.newResource('index.md', markdown.raw, 'text/markdown').save()
     const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
-    const path = `post/${createArticleSlug(title)}`
+    const path = `${category}/${year}/${createArticleSlug(title)}`
     return {
         title,
         banner,
         preview: markdown.raw.slice(0, 150),
         kind: 'regular',
-        categories: [],
-        tags: tagsAndCategories,
+        category,
+        tags,
         markdown: markdownHandle.hash,
         html: htmlHash,
         path,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        stamp: await globalState.swarm.mustGetUsableStamp()
     }
 }

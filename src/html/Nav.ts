@@ -3,9 +3,7 @@ import { createArticleSlug } from '../engine/Utility'
 
 export function createNav(globalState: GlobalState, depth: number, active: string) {
     const categorySet = globalState.articles.reduce((categories, article) => {
-        for (const category of article.categories) {
-            categories.add(category)
-        }
+        categories.add(article.category)
         return categories
     }, new Set<string>())
     const categories = ['Latest', ...[...categorySet].sort((a, b) => a.localeCompare(b))]

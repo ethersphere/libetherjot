@@ -9,26 +9,18 @@ import { createArticleSlug } from './Utility'
 
 export async function recreateMantaray(globalState: GlobalState): Promise<void> {
     const collection = globalState.swarm.newCollection()
-    for (const prefix of ['', 'post/']) {
-        await collection.addRawData(
-            `${prefix}font-variant-2.woff2`,
-            globalState.swarm.newRawData(createNormalFontData(), 'font/woff2')
-        )
-        await collection.addRawData(
-            `${prefix}font-variant-1.ttf`,
-            globalState.swarm.newRawData(createBrandingFontData(), 'font/ttf')
-        )
-        await collection.addRawData(
-            `${prefix}font-variant-3.ttf`,
-            globalState.swarm.newRawData(createArticleFontData(), 'font/ttf')
-        )
-        await collection.addRawData(`${prefix}style.css`, globalState.swarm.newRawData(createStyle(), 'text/css'))
-        await collection.addRawData(
-            `${prefix}default.png`,
-            globalState.swarm.newRawData(createDefaultImage(), 'image/png')
-        )
-        await collection.addRawData(`${prefix}favicon.png`, globalState.swarm.newRawData(createFavicon(), 'image/png'))
-    }
+    await collection.addRawData(
+        'font-variant-2.woff2',
+        globalState.swarm.newRawData(createNormalFontData(), 'font/woff2')
+    )
+    await collection.addRawData(
+        'font-variant-1.ttf',
+        globalState.swarm.newRawData(createBrandingFontData(), 'font/ttf')
+    )
+    await collection.addRawData('font-variant-3.ttf', globalState.swarm.newRawData(createArticleFontData(), 'font/ttf'))
+    await collection.addRawData('style.css', globalState.swarm.newRawData(createStyle(), 'text/css'))
+    await collection.addRawData('default.png', globalState.swarm.newRawData(createDefaultImage(), 'image/png'))
+    await collection.addRawData('favicon.png', globalState.swarm.newRawData(createFavicon(), 'image/png'))
     await collection.addRawData('/', await createFrontPage(globalState))
     await collection.addRawData('index.html', await createFrontPage(globalState))
     for (const page of globalState.pages) {

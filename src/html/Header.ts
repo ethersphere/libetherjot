@@ -24,7 +24,11 @@ export async function createHeader(globalState: GlobalState, depth: number, acti
             <div class="header-top-row">
                 <a href="${'../'.repeat(depth)}">
                     <div class="blog-name-row">
-                        ${createLogoSvg()}
+                        ${
+                            globalState.configuration.header.logo
+                                ? `<img src="${'../'.repeat(depth)}${globalState.configuration.header.logo}" />`
+                                : createLogoSvg()
+                        }
                         <${variant} class="blog-name">${title}</${variant}>
                     </div>
                 </a>

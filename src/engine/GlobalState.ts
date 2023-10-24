@@ -13,6 +13,7 @@ interface Configuration {
     title: string
     header: {
         title: string
+        logo: string
         description: string
         link: string
     }
@@ -44,12 +45,13 @@ export interface Article {
     preview: string
     markdown: string
     html: string
-    categories: string[]
+    category: string
     tags: string[]
     createdAt: number
     path: string
     banner: string
     kind: 'h1' | 'h2' | 'highlight' | 'regular'
+    stamp: string
 }
 
 export interface GlobalStateOnDisk {
@@ -83,6 +85,7 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
             title: Types.asString(configuration.title),
             header: {
                 title: Types.asEmptiableString(Objects.getDeep(configuration, 'header.title')),
+                logo: Types.asEmptiableString(Objects.getDeep(configuration, 'header.logo')),
                 description: Types.asEmptiableString(Objects.getDeep(configuration, 'header.description')),
                 link: Types.asEmptiableString(Objects.getDeep(configuration, 'header.link'))
             },
@@ -114,12 +117,13 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                 preview: Types.asString(x.preview),
                 markdown: Types.asString(x.markdown),
                 html: Types.asString(x.html),
-                categories: Types.asArray(x.categories || []).map(Types.asString),
+                category: Types.asString(x.category),
                 tags: Types.asArray(x.tags || []).map(Types.asString),
                 createdAt: Types.asNumber(x.createdAt),
                 path: Types.asString(x.path),
                 banner: x.banner || null,
-                kind: Types.asString(x.kind) as any
+                kind: Types.asString(x.kind) as any,
+                stamp: Types.asString(x.stamp)
             }
         }),
         images: Types.asObject(json.images) as Record<string, string>,
@@ -161,6 +165,7 @@ export async function createDefaultGlobalState(websiteName: string): Promise<Glo
             title: websiteName,
             header: {
                 title: '',
+                logo: '',
                 description: '',
                 link: ''
             },

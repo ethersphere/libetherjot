@@ -18,7 +18,7 @@ export async function createFrontPage(globalState: GlobalState) {
         </div>
     </main>
     ${await createFooter(globalState, 0)}`
-    const html = await createHtml5(head, body)
+    const html = await createHtml5(head, body, 0)
     return globalState.swarm.newRawData(html, 'text/html')
 }
 
@@ -26,9 +26,7 @@ async function buildCollectionPages(globalState: GlobalState) {
     const uniqueCategories = new Set<string>()
     const uniqueTags = new Set<string>()
     for (const article of globalState.articles) {
-        for (const category of article.categories) {
-            uniqueCategories.add(category)
-        }
+        uniqueCategories.add(article.category)
         for (const tag of article.tags) {
             uniqueTags.add(tag)
         }
