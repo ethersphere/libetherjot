@@ -11,7 +11,7 @@ export async function createCollectionPage(globalState: GlobalState, collectionN
     ${await createHeader(globalState, 0, collectionName)}
     <main>
         <div class="content-area">
-            ${createPostContainer(globalState, collectionName)}
+            ${createPostContainer(globalState, 0, collectionName)}
         </div>
     </main>
     ${await createFooter(globalState, 0)}`

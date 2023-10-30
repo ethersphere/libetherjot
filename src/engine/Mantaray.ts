@@ -35,11 +35,10 @@ export async function recreateMantaray(globalState: GlobalState): Promise<void> 
             globalState.swarm.newHandle(collectionPage, globalState.collections[collectionPage], 'text/html')
         )
     }
-    for (const [src, reference] of Object.entries(globalState.images)) {
-        await collection.addHandle(src, globalState.swarm.newHandle(src, reference, 'image/png'))
+    for (const asset of globalState.assets) {
         await collection.addHandle(
-            Strings.joinUrl('post', src),
-            globalState.swarm.newHandle(src, reference, 'image/png')
+            Strings.joinUrl(asset.name),
+            globalState.swarm.newHandle(asset.name, asset.reference, asset.contentType)
         )
     }
     await collection.save()

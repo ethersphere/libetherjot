@@ -8,11 +8,14 @@ export function createPost(
     createdAt: number,
     path: string,
     banner: string,
-    kind: 'h1' | 'h2' | 'highlight' | 'regular'
+    kind: 'h1' | 'h2' | 'highlight' | 'regular',
+    depth: number
 ): string {
     const formattedDate = new Date(createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric' })
 
-    const image = kind === 'highlight' ? '' : `<a href="${path}"><img class="image-16-9" src="${banner}"></a>`
+    const bannerSrc = banner === 'default.png' ? 'default.png' : '../'.repeat(depth) + banner
+
+    const image = kind === 'highlight' ? '' : `<a href="${path}"><img class="image-16-9" src="${bannerSrc}"></a>`
     const meta =
         kind === 'highlight'
             ? `<p class="article-timestamp">${formattedDate}</p>`

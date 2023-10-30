@@ -355,6 +355,7 @@ aside {
     margin-bottom: 64px;
 }
 .onpage-banner {
+    text-align: center;
     margin-bottom: 70px;
 }
 .no-content {

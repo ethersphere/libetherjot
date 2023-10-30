@@ -3,7 +3,7 @@ import { Wallet, ethers } from 'ethers'
 import { Swarm } from 'libswarm'
 import { createFrontPage } from '../page/FrontPage'
 
-interface Asset {
+export interface Asset {
     name: string
     contentType: string
     reference: string
@@ -60,7 +60,6 @@ export interface GlobalStateOnDisk {
     feed: string
     pages: Page[]
     articles: Article[]
-    images: Record<string, string>
     collections: Record<string, string>
     assets: Asset[]
 }
@@ -72,7 +71,6 @@ export interface GlobalState {
     feed: string
     pages: Page[]
     articles: Article[]
-    images: Record<string, string>
     collections: Record<string, string>
     assets: Asset[]
 }
@@ -126,7 +124,6 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                 stamp: Types.asString(x.stamp)
             }
         }),
-        images: Types.asObject(json.images) as Record<string, string>,
         collections: Types.asObject(json.collections || {}) as Record<string, string>,
         assets: Types.asArray(json.assets || []).map((x: any) => ({
             name: Types.asString(x.name),
@@ -144,7 +141,6 @@ export async function saveGlobalState(globalState: GlobalState): Promise<GlobalS
         feed: globalState.feed,
         pages: globalState.pages,
         articles: globalState.articles,
-        images: globalState.images,
         collections: globalState.collections,
         assets: globalState.assets
     }
@@ -159,7 +155,6 @@ export async function createDefaultGlobalState(websiteName: string): Promise<Glo
         privateKey: wallet.privateKey,
         pages: [],
         articles: [],
-        images: {},
         feed,
         configuration: {
             title: websiteName,
@@ -203,7 +198,6 @@ async function createGlobalState(globalStateOnDisk: GlobalStateOnDisk): Promise<
         feed: globalStateOnDisk.feed,
         pages: globalStateOnDisk.pages,
         articles: globalStateOnDisk.articles,
-        images: globalStateOnDisk.images,
         collections: globalStateOnDisk.collections,
         assets: globalStateOnDisk.assets
     }

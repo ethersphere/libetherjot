@@ -31,7 +31,7 @@ export async function createArticlePage(
               2
           )}</div></div>`
         : ``
-    const relatedArticlesHtml = createRelatedArticles(globalState, title, tags)
+    const relatedArticlesHtml = createRelatedArticles(globalState, title, tags, 2)
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
@@ -50,7 +50,9 @@ export async function createArticlePage(
                 </div>
             </div>
             <div class="content-area onpage-banner">
-                <img src="${banner}" class="banner" />
+                <img src="${
+                    !banner || banner === 'default.png' ? '../'.repeat(2) + 'default.png' : banner
+                }" class="banner" />
             </div>
             <div class="content-area grid-container">
                 <aside class="grid-3">
@@ -78,11 +80,7 @@ export async function createArticlePage(
                 </aside>
                 <div class="grid-6">
                     ${processedArticle.html}
-                    ${
-                        globalState.configuration.allowDonations
-                            ? await createDonationButton(globalState, await globalState.swarm.mustGetUsableStamp())
-                            : ''
-                    }
+                    ${await createDonationButton(globalState, await globalState.swarm.mustGetUsableStamp())}
                 </div>
             </div>
         </article>
@@ -122,7 +120,7 @@ export async function createArticlePage(
     return {
         title,
         banner,
-        preview: markdown.raw.slice(0, 150),
+        preview: markdown.body.slice(0, 150) + '...',
         kind: 'regular',
         category,
         tags,

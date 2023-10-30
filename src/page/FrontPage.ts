@@ -14,7 +14,7 @@ export async function createFrontPage(globalState: GlobalState) {
     <main>
         <div class="content-area">
             ${globalState.articles.length === 0 ? '<p class="no-content">This blog has no content yet.</p>' : ''}
-            ${createPostContainer(globalState)}
+            ${createPostContainer(globalState, 0)}
         </div>
     </main>
     ${await createFooter(globalState, 0)}`
