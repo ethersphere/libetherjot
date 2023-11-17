@@ -22,6 +22,7 @@ export async function createArticlePage(
     tags: string[],
     banner: string,
     date: string,
+    comments: boolean,
     parseFn: (markdown: string) => string
 ): Promise<Article> {
     const processedArticle = await preprocess(parseFn(markdown.body))
@@ -35,7 +36,7 @@ export async function createArticlePage(
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
-    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}`
+    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}${comments ? '<link rel="stylesheet" href="http://localhost:8000/style.css" />' : ''}`
     const body = `
     ${await createHeader(globalState, 2, 'Latest', 'p')}
     <main>
@@ -82,6 +83,14 @@ export async function createArticlePage(
                     ${processedArticle.html}
                     ${await createDonationButton(globalState, await globalState.swarm.mustGetUsableStamp())}
                 </div>
+                ${comments ?
+                    `
+                        <div id="comments"></div>
+                        <script src="http://localhost:8000/index.umd.js"></script>
+                        <script>
+                            window.SwarmCommentSystem.renderSwarmComments('comments')
+                        </script>
+                    ` : ''}
             </div>
         </article>
         ${readMoreHtml}
@@ -116,7 +125,7 @@ export async function createArticlePage(
     const html = await createHtml5(head, body, 2)
     const markdownHandle = await globalState.swarm.newResource('index.md', markdown.raw, 'text/markdown').save()
     const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
-    const path = `${category}/${year}/${createArticleSlug(title)}`
+    const path = `${category}/${year}/${createArticleSlug(title)}`    
     return {
         title,
         banner,
@@ -128,6 +137,7 @@ export async function createArticlePage(
         html: htmlHash,
         path,
         createdAt: Date.now(),
+        comments,
         stamp: await globalState.swarm.mustGetUsableStamp()
     }
 }
