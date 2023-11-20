@@ -85,7 +85,7 @@ export async function createArticlePage(
                 </div>
                 ${comments ?
                     `
-                        <div id="comments"></div>
+                        <div class="grid-6" id="comments"></div>
                         <script src="http://localhost:8000/index.umd.js"></script>
                         <script>
                             window.SwarmCommentSystem.renderSwarmComments('comments')
