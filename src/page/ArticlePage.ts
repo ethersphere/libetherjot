@@ -22,6 +22,7 @@ export async function createArticlePage(
     tags: string[],
     banner: string,
     date: string,
+    kind: 'regular' | 'h1' | 'h2' | 'highlight',
     parseFn: (markdown: string) => string
 ): Promise<Article> {
     const processedArticle = await preprocess(parseFn(markdown.body))
@@ -80,7 +81,7 @@ export async function createArticlePage(
                 </aside>
                 <div class="grid-6">
                     ${processedArticle.html}
-                    ${await createDonationButton(globalState, await globalState.swarm.mustGetUsableStamp())}
+                    ${await createDonationButton(await globalState.swarm.mustGetUsableStamp())}
                 </div>
             </div>
         </article>
@@ -121,7 +122,7 @@ export async function createArticlePage(
         title,
         banner,
         preview: markdown.body.slice(0, 150) + '...',
-        kind: 'regular',
+        kind,
         category,
         tags,
         markdown: markdownHandle.hash,
