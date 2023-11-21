@@ -56,6 +56,7 @@ export interface Article {
     banner: string
     kind: 'h1' | 'h2' | 'regular' | 'highlight'
     stamp: string
+    commentsFeed: string
 }
 
 export interface GlobalStateOnDisk {
@@ -129,7 +130,8 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                 path: Types.asString(x.path),
                 banner: x.banner || null,
                 kind: Types.asString(x.kind) as any,
-                stamp: Types.asString(x.stamp)
+                stamp: Types.asString(x.stamp),
+                commentsFeed: Types.asString(x.commentsFeed)
             }
         }),
         collections: Types.asObject(json.collections || {}) as Record<string, string>,

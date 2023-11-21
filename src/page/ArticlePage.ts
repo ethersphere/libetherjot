@@ -3,6 +3,7 @@ import { ParsedMarkdown } from '../engine/FrontMatter'
 import { Article, GlobalState } from '../engine/GlobalState'
 import { preprocess } from '../engine/Preprocessor'
 import { createArticleSlug } from '../engine/Utility'
+import { createCommentSystem } from '../html/Comment'
 import { createDonationButton } from '../html/Donation'
 import { createFooter } from '../html/Footer'
 import { createHeader } from '../html/Header'
@@ -22,6 +23,7 @@ export async function createArticlePage(
     tags: string[],
     banner: string,
     date: string,
+    commentsFeed: string,
     kind: 'regular' | 'h1' | 'h2' | 'highlight',
     parseFn: (markdown: string) => string
 ): Promise<Article> {
@@ -36,7 +38,11 @@ export async function createArticlePage(
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
-    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}`
+    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}${
+        globalState.configuration.extensions.comments
+            ? `<style>._swarm-comment-tabs_1hhjj_1{display:flex}._swarm-comment-tabs_1hhjj_1 button{min-width:100px}._swarm-comment-tabs_1hhjj_1 ._active_1hhjj_7{background-color:#999}._swarm-comment-tabs-content_1hhjj_11{margin-top:20px}._swarm-comment-form_rkfsi_1{display:flex;flex-direction:column;margin-bottom:10px;max-width:600px}._swarm-comment-form_rkfsi_1 h6{text-align:left;font-size:16px}._swarm-comment-form_rkfsi_1 input{width:auto}._swarm-comment-form_rkfsi_1 textarea{margin:20px 0}._field-error_rkfsi_18{border:1px solid red}</style>`
+            : ''
+    }`
     const body = `
     ${await createHeader(globalState, 2, 'Latest', 'p')}
     <main>
@@ -81,7 +87,12 @@ export async function createArticlePage(
                 </aside>
                 <div class="grid-6">
                     ${processedArticle.html}
-                    ${await createDonationButton(await globalState.swarm.mustGetUsableStamp())}
+                    ${
+                        globalState.configuration.extensions.donations
+                            ? await createDonationButton(await globalState.swarm.mustGetUsableStamp())
+                            : ''
+                    }
+                    ${globalState.configuration.extensions.comments ? await createCommentSystem(commentsFeed) : ''}
                 </div>
             </div>
         </article>
@@ -129,6 +140,7 @@ export async function createArticlePage(
         html: htmlHash,
         path,
         createdAt: Date.now(),
+        commentsFeed,
         stamp: await globalState.swarm.mustGetUsableStamp()
     }
 }
