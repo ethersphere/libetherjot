@@ -1,4 +1,4 @@
-import { Objects, Strings } from 'cafe-utility'
+import { Objects } from 'cafe-utility'
 import { GlobalState } from '../engine/GlobalState'
 import { createLogoSvg } from './LogoSvg'
 import { createNav } from './Nav'
@@ -6,17 +6,15 @@ import { createNav } from './Nav'
 export async function createHeader(globalState: GlobalState, depth: number, active: string, variant = 'h1') {
     const title = Objects.getFirstDeep(globalState.configuration as any, ['header.title', 'title'])
     const description = Objects.getDeep(globalState.configuration as any, 'header.description')
-    const link = Objects.getDeep(globalState.configuration as any, 'header.link')
+    const linkLabel = Objects.getDeep(globalState.configuration as any, 'header.linkLabel')
+    const linkAddress = Objects.getDeep(globalState.configuration as any, 'header.linkAddress')
     const descriptionHtml = description ? `<p class="blog-description">${description}</p>` : ''
-    const linkHtml = link
-        ? `
-        <div class="blog-link">
-            ${Strings.resolveMarkdownLinks(
-                link as string,
-                (label, link) => `<a href="${link}" target="_blank">${label}</a>`
-            )}
+    const linkHtml =
+        linkLabel && linkAddress
+            ? `<div class="blog-link">
+            <a href="${linkAddress}" target="_blank">${linkLabel}</a>
         </div>`
-        : ''
+            : ''
 
     return `
     <header>
@@ -26,7 +24,7 @@ export async function createHeader(globalState: GlobalState, depth: number, acti
                     <div class="blog-name-row">
                         ${
                             globalState.configuration.header.logo
-                                ? `<img src="${'../'.repeat(depth)}${globalState.configuration.header.logo}" />`
+                                ? `<img src="${'../'.repeat(depth + 1)}${globalState.configuration.header.logo}" />`
                                 : createLogoSvg()
                         }
                         <${variant} class="blog-name">${title}</${variant}>

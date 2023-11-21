@@ -22,8 +22,8 @@ export async function createArticlePage(
     tags: string[],
     banner: string,
     date: string,
-    comments: boolean,
     commentsFeed: string,
+    kind: 'regular' | 'h1' | 'h2' | 'highlight',
     parseFn: (markdown: string) => string
 ): Promise<Article> {
     const processedArticle = await preprocess(parseFn(markdown.body))
@@ -37,7 +37,11 @@ export async function createArticlePage(
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
-    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}${comments ? '<link rel="stylesheet" href="http://localhost:8000/style.css" />' : ''}`
+    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}${
+        globalState.configuration.extensions.comments
+            ? `<style>._swarm-comment-tabs_1hhjj_1{display:flex}._swarm-comment-tabs_1hhjj_1 button{min-width:100px}._swarm-comment-tabs_1hhjj_1 ._active_1hhjj_7{background-color:#999}._swarm-comment-tabs-content_1hhjj_11{margin-top:20px}._swarm-comment-form_rkfsi_1{display:flex;flex-direction:column;margin-bottom:10px;max-width:600px}._swarm-comment-form_rkfsi_1 h6{text-align:left;font-size:16px}._swarm-comment-form_rkfsi_1 input{width:auto}._swarm-comment-form_rkfsi_1 textarea{margin:20px 0}._field-error_rkfsi_18{border:1px solid red}</style>`
+            : ''
+    }`
     const body = `
     ${await createHeader(globalState, 2, 'Latest', 'p')}
     <main>
@@ -82,16 +86,17 @@ export async function createArticlePage(
                 </aside>
                 <div class="grid-6">
                     ${processedArticle.html}
-                    ${await createDonationButton(globalState, await globalState.swarm.mustGetUsableStamp())}
+                    ${await createDonationButton(await globalState.swarm.mustGetUsableStamp())}
                 </div>
-                ${comments ?
-                    `
-                        <div class="grid-6" id="comments"></div>
-                        <script src="http://localhost:8000/index.umd.js"></script>
+                ${
+                    globalState.configuration.extensions.comments
+                        ? `<div class="grid-6" id="comments"></div>
+                        <script src="https://cdn.jsdelivr.net/npm/swarm-comment-system-ui@1.0.0"></script>
                         <script>
                             window.SwarmCommentSystem.renderSwarmComments('comments', { approvedFeedAddress: "${commentsFeed}" })
-                        </script>
-                    ` : ''}
+                        </script>`
+                        : ''
+                }
             </div>
         </article>
         ${readMoreHtml}
@@ -126,19 +131,18 @@ export async function createArticlePage(
     const html = await createHtml5(head, body, 2)
     const markdownHandle = await globalState.swarm.newResource('index.md', markdown.raw, 'text/markdown').save()
     const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
-    const path = `${category}/${year}/${createArticleSlug(title)}`    
+    const path = `${category}/${year}/${createArticleSlug(title)}`
     return {
         title,
         banner,
         preview: markdown.body.slice(0, 150) + '...',
-        kind: 'regular',
+        kind,
         category,
         tags,
         markdown: markdownHandle.hash,
         html: htmlHash,
         path,
         createdAt: Date.now(),
-        comments,
         commentsFeed,
         stamp: await globalState.swarm.mustGetUsableStamp()
     }
