@@ -3,6 +3,7 @@ import { ParsedMarkdown } from '../engine/FrontMatter'
 import { Article, GlobalState } from '../engine/GlobalState'
 import { preprocess } from '../engine/Preprocessor'
 import { createArticleSlug } from '../engine/Utility'
+import { createCommentSystem } from '../html/Comment'
 import { createDonationButton } from '../html/Donation'
 import { createFooter } from '../html/Footer'
 import { createHeader } from '../html/Header'
@@ -86,17 +87,13 @@ export async function createArticlePage(
                 </aside>
                 <div class="grid-6">
                     ${processedArticle.html}
-                    ${await createDonationButton(await globalState.swarm.mustGetUsableStamp())}
+                    ${
+                        globalState.configuration.extensions.donations
+                            ? await createDonationButton(await globalState.swarm.mustGetUsableStamp())
+                            : ''
+                    }
+                    ${globalState.configuration.extensions.comments ? await createCommentSystem(commentsFeed) : ''}
                 </div>
-                ${
-                    globalState.configuration.extensions.comments
-                        ? `<div class="grid-6" id="comments"></div>
-                        <script src="https://cdn.jsdelivr.net/npm/swarm-comment-system-ui@1.0.0"></script>
-                        <script>
-                            window.SwarmCommentSystem.renderSwarmComments('comments', { approvedFeedAddress: "${commentsFeed}" })
-                        </script>`
-                        : ''
-                }
             </div>
         </article>
         ${readMoreHtml}

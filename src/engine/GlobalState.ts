@@ -131,8 +131,7 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                 banner: x.banner || null,
                 kind: Types.asString(x.kind) as any,
                 stamp: Types.asString(x.stamp),
-                comments: Types.asBoolean(x.comments),
-                commentsFeed: Types.isString(x.commentsFeed) ? x.commentsFeed : ''
+                commentsFeed: Types.asString(x.commentsFeed)
             }
         }),
         collections: Types.asObject(json.collections || {}) as Record<string, string>,
