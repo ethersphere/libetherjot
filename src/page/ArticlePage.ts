@@ -23,6 +23,7 @@ export async function createArticlePage(
     banner: string,
     date: string,
     comments: boolean,
+    commentsFeed: string,
     parseFn: (markdown: string) => string
 ): Promise<Article> {
     const processedArticle = await preprocess(parseFn(markdown.body))
@@ -88,7 +89,7 @@ export async function createArticlePage(
                         <div class="grid-6" id="comments"></div>
                         <script src="http://localhost:8000/index.umd.js"></script>
                         <script>
-                            window.SwarmCommentSystem.renderSwarmComments('comments')
+                            window.SwarmCommentSystem.renderSwarmComments('comments', { approvedFeedAddress: "${commentsFeed}" })
                         </script>
                     ` : ''}
             </div>
@@ -138,6 +139,7 @@ export async function createArticlePage(
         path,
         createdAt: Date.now(),
         comments,
+        commentsFeed,
         stamp: await globalState.swarm.mustGetUsableStamp()
     }
 }
