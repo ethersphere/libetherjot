@@ -15,7 +15,8 @@ interface Configuration {
         title: string
         logo: string
         description: string
-        link: string
+        linkLabel: string
+        linkAddress: string
     }
     main: {
         highlight: string
@@ -30,7 +31,10 @@ interface Configuration {
             reddit: string
         }
     }
-    allowDonations: boolean
+    extensions: {
+        donations: boolean
+        comments: boolean
+    }
 }
 
 interface Page {
@@ -50,7 +54,7 @@ export interface Article {
     createdAt: number
     path: string
     banner: string
-    kind: 'h1' | 'h2' | 'highlight' | 'regular'
+    kind: 'h1' | 'h2' | 'regular' | 'highlight'
     stamp: string
     comments: boolean
     commentsFeed: string
@@ -87,7 +91,8 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                 title: Types.asEmptiableString(Objects.getDeep(configuration, 'header.title')),
                 logo: Types.asEmptiableString(Objects.getDeep(configuration, 'header.logo')),
                 description: Types.asEmptiableString(Objects.getDeep(configuration, 'header.description')),
-                link: Types.asEmptiableString(Objects.getDeep(configuration, 'header.link'))
+                linkLabel: Types.asEmptiableString(Objects.getDeep(configuration, 'header.linkLabel')),
+                linkAddress: Types.asEmptiableString(Objects.getDeep(configuration, 'header.linkAddress'))
             },
             main: {
                 highlight: Types.asEmptiableString(Objects.getDeep(configuration, 'main.highlight'))
@@ -102,7 +107,10 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                     reddit: Types.asEmptiableString(Objects.getDeep(configuration, 'footer.links.reddit'))
                 }
             },
-            allowDonations: Types.asBoolean(Objects.getDeep(configuration, 'allowDonations'))
+            extensions: {
+                donations: Types.asBoolean(Objects.getDeep(configuration, 'extensions.donations')),
+                comments: Types.asBoolean(Objects.getDeep(configuration, 'extensions.comments'))
+            }
         },
         feed: Types.asString(json.feed),
         pages: Types.asArray(json.pages).map((x: any) => ({
@@ -166,7 +174,8 @@ export async function createDefaultGlobalState(websiteName: string): Promise<Glo
                 title: '',
                 logo: '',
                 description: '',
-                link: ''
+                linkLabel: '',
+                linkAddress: ''
             },
             main: {
                 highlight: ''
@@ -181,7 +190,10 @@ export async function createDefaultGlobalState(websiteName: string): Promise<Glo
                     reddit: ''
                 }
             },
-            allowDonations: false
+            extensions: {
+                donations: false,
+                comments: false
+            }
         },
         collections: {},
         assets: []

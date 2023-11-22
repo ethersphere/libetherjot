@@ -446,6 +446,15 @@ button {
     display: flex;
     gap: 4px;
 }
+#donation {
+    border: 2px solid black;
+    padding: 16px;
+}
+#donation > div > p > code {
+    word-break: break-all;
+    font-weight: normal;
+    font-size: 14px;
+}
 @media screen and (max-width: 992px) {
     .post-container {
         grid-template-columns: repeat(2, 1fr);

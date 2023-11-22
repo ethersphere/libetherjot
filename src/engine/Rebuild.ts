@@ -27,6 +27,7 @@ export async function rebuildArticlePages(
             new Date(article.createdAt).toDateString(),
             article.comments,
             article.commentsFeed,
+            article.kind,
             parseFn
         )
         article.html = results.html
