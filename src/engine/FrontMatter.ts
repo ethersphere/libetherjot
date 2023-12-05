@@ -9,6 +9,7 @@ export interface ParsedMarkdown {
 }
 
 export function parseMarkdown(markdown: string): ParsedMarkdown {
+    markdown = markdown.trim()
     if (markdown.startsWith('---')) {
         const metadata = Strings.extractBlock(markdown, { opening: '---', closing: '---', exclusive: true })
         if (!metadata) {

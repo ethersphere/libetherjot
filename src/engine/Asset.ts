@@ -6,7 +6,7 @@ export async function addAsset(
     byteArray: Uint8Array,
     contentType: string
 ): Promise<Asset> {
-    const hash = await globalState.swarm.newResource('upload', byteArray, contentType).save()
+    const hash = await (await globalState.swarm.newResource('upload', byteArray, contentType)).save()
     const asset = {
         reference: hash.hash,
         contentType,

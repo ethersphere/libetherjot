@@ -19,8 +19,8 @@ export async function createMenuPage(
         parseFn(markdown)
     )}</main>${await createFooter(globalState, 0)}`
     const html = await createHtml5(head, body, 0)
-    const markdownHandle = await globalState.swarm.newResource('index.md', markdown, 'text/markdown').save()
-    const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
+    const markdownHandle = await (await globalState.swarm.newResource('index.md', markdown, 'text/markdown')).save()
+    const htmlHash = await (await globalState.swarm.newRawData(html, 'text/html')).save()
     return {
         markdownReference: markdownHandle.hash,
         swarmReference: htmlHash

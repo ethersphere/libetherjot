@@ -1,6 +1,6 @@
 {
     "name": "libetherjot",
-    "version": "0.4.0",
+    "version": "0.5.1",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -12,10 +12,10 @@
     "license": "MIT",
     "dependencies": {
         "cafe-node-utility": "^1.1.0",
-        "cafe-utility": "^10.22.0",
+        "cafe-utility": "^12.2.0",
         "ethers": "^6.7.1",
         "js-yaml": "^4.1.0",
-        "libswarm": "^0.3.0",
+        "libswarm": "^0.4.1",
         "toml": "^3.0.0"
     },
     "devDependencies": {

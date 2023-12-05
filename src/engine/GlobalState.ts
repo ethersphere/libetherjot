@@ -32,6 +32,7 @@ interface Configuration {
         }
     }
     extensions: {
+        ethereumAddress: string
         donations: boolean
         comments: boolean
     }
@@ -60,6 +61,9 @@ export interface Article {
 }
 
 export interface GlobalStateOnDisk {
+    beeApi: string
+    beeDebugApi: string
+    postageBatchId: string
     privateKey: string
     configuration: Configuration
     feed: string
@@ -70,6 +74,9 @@ export interface GlobalStateOnDisk {
 }
 
 export interface GlobalState {
+    beeApi: string
+    beeDebugApi: string
+    postageBatchId: string
     swarm: Swarm
     wallet: Wallet
     configuration: Configuration
@@ -84,6 +91,9 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
     const configuration = Types.asObject(json.configuration)
     const globalStateOnDisk: GlobalStateOnDisk = {
         privateKey: Types.asString(json.privateKey),
+        beeApi: Types.asString(json.beeApi),
+        beeDebugApi: Types.asString(json.beeDebugApi),
+        postageBatchId: Types.asEmptiableString(json.postageBatchId),
         configuration: {
             title: Types.asString(configuration.title),
             header: {
@@ -107,6 +117,7 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
                 }
             },
             extensions: {
+                ethereumAddress: Types.asEmptiableString(Objects.getDeep(configuration, 'extensions.ethereumAddress')),
                 donations: Types.asBoolean(Objects.getDeep(configuration, 'extensions.donations')),
                 comments: Types.asBoolean(Objects.getDeep(configuration, 'extensions.comments'))
             }
@@ -146,6 +157,9 @@ export async function getGlobalState(json: Record<string, any>): Promise<GlobalS
 
 export async function saveGlobalState(globalState: GlobalState): Promise<GlobalStateOnDisk> {
     const globalStateOnDisk: GlobalStateOnDisk = {
+        beeApi: globalState.beeApi,
+        beeDebugApi: globalState.beeDebugApi,
+        postageBatchId: globalState.postageBatchId,
         privateKey: globalState.wallet.privateKey,
         configuration: globalState.configuration,
         feed: globalState.feed,
@@ -157,11 +171,30 @@ export async function saveGlobalState(globalState: GlobalState): Promise<GlobalS
     return globalStateOnDisk
 }
 
-export async function createDefaultGlobalState(websiteName: string): Promise<GlobalStateOnDisk> {
-    const swarm = new Swarm()
+interface DefaultStateParams {
+    beeApi?: string
+    beeDebugApi?: string
+    postageBatchId?: string
+}
+
+export async function createDefaultGlobalState(
+    websiteName: string,
+    params?: DefaultStateParams
+): Promise<GlobalStateOnDisk> {
+    const beeApi = params?.beeApi || 'http://localhost:1633'
+    const beeDebugApi = params?.beeDebugApi || 'http://localhost:1635'
+    const postageBatchId = params?.postageBatchId || ''
+    const swarm = new Swarm({
+        beeApi,
+        beeDebugApi,
+        postageBatchId
+    })
     const wallet = ethers.Wallet.createRandom()
-    const feed = await swarm.newWebsite(websiteName, swarm.newCollection()).generateAddress()
+    const feed = await (await swarm.newWebsite(websiteName, await swarm.newCollection())).generateAddress()
     const globalStateOnDisk: GlobalStateOnDisk = {
+        beeApi,
+        beeDebugApi,
+        postageBatchId,
         privateKey: wallet.privateKey,
         pages: [],
         articles: [],
@@ -189,6 +222,7 @@ export async function createDefaultGlobalState(websiteName: string): Promise<Glo
                 }
             },
             extensions: {
+                ethereumAddress: '',
                 donations: false,
                 comments: false
             }
@@ -202,7 +236,14 @@ export async function createDefaultGlobalState(websiteName: string): Promise<Glo
 
 async function createGlobalState(globalStateOnDisk: GlobalStateOnDisk): Promise<GlobalState> {
     const globalState: GlobalState = {
-        swarm: new Swarm(),
+        beeApi: globalStateOnDisk.beeApi,
+        beeDebugApi: globalStateOnDisk.beeDebugApi,
+        postageBatchId: globalStateOnDisk.postageBatchId,
+        swarm: new Swarm({
+            beeApi: globalStateOnDisk.beeApi,
+            beeDebugApi: globalStateOnDisk.beeDebugApi,
+            postageBatchId: globalStateOnDisk.postageBatchId || undefined
+        }),
         wallet: new ethers.Wallet(
             globalStateOnDisk.privateKey.startsWith('0x')
                 ? globalStateOnDisk.privateKey.slice(2)

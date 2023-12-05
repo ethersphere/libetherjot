@@ -38,11 +38,7 @@ export async function createArticlePage(
     const readMoreHtml = relatedArticlesHtml
         ? `<div class="content-area"><h2 class="read-more">Read more...</h2>${relatedArticlesHtml}</div>`
         : ``
-    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}${
-        globalState.configuration.extensions.comments
-            ? `<style>._swarm-comment-tabs_1hhjj_1{display:flex}._swarm-comment-tabs_1hhjj_1 button{min-width:100px}._swarm-comment-tabs_1hhjj_1 ._active_1hhjj_7{background-color:#999}._swarm-comment-tabs-content_1hhjj_11{margin-top:20px}._swarm-comment-form_rkfsi_1{display:flex;flex-direction:column;margin-bottom:10px;max-width:600px}._swarm-comment-form_rkfsi_1 h6{text-align:left;font-size:16px}._swarm-comment-form_rkfsi_1 input{width:auto}._swarm-comment-form_rkfsi_1 textarea{margin:20px 0}._field-error_rkfsi_18{border:1px solid red}</style>`
-            : ''
-    }`
+    const head = `<title>${title} | ${globalState.configuration.title}</title>${createStyleSheet(2)}`
     const body = `
     ${await createHeader(globalState, 2, 'Latest', 'p')}
     <main>
@@ -88,8 +84,12 @@ export async function createArticlePage(
                 <div class="grid-6">
                     ${processedArticle.html}
                     ${
-                        globalState.configuration.extensions.donations
-                            ? await createDonationButton(await globalState.swarm.mustGetUsableStamp())
+                        globalState.configuration.extensions.donations &&
+                        globalState.configuration.extensions.ethereumAddress
+                            ? await createDonationButton(
+                                  globalState.configuration.extensions.ethereumAddress,
+                                  await globalState.swarm.mustGetUsableStamp()
+                              )
                             : ''
                     }
                     ${globalState.configuration.extensions.comments ? await createCommentSystem(commentsFeed) : ''}
@@ -124,22 +124,24 @@ export async function createArticlePage(
             window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url))
         })
     </script>`
-    const year = new Date().getFullYear()
+    const year = new Date(date).getFullYear()
     const html = await createHtml5(head, body, 2)
-    const markdownHandle = await globalState.swarm.newResource('index.md', markdown.raw, 'text/markdown').save()
-    const htmlHash = await globalState.swarm.newRawData(html, 'text/html').save()
+    const markdownHandle = await (
+        await globalState.swarm.newResource('index.md', markdown.body, 'text/markdown')
+    ).save()
+    const htmlHash = await (await globalState.swarm.newRawData(html, 'text/html')).save()
     const path = `${category}/${year}/${createArticleSlug(title)}`
     return {
         title,
         banner,
-        preview: markdown.body.slice(0, 150) + '...',
+        preview: Strings.stripHtml(processedArticle.html).slice(0, 150) + '...',
         kind,
         category,
         tags,
         markdown: markdownHandle.hash,
         html: htmlHash,
         path,
-        createdAt: Date.now(),
+        createdAt: new Date(date).getTime(),
         commentsFeed,
         stamp: await globalState.swarm.mustGetUsableStamp()
     }
